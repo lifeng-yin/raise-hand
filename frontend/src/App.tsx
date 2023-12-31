@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react';
+
 import Pusher from 'pusher-js';
 import { PusherProvider } from './contexts/PusherContext';
+import { Switch, Route } from 'wouter';
+
+import EnterName from './pages/EnterName';
+import Room from './pages/Room';
+
 import './App.css'
+
 
 const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY, {
   cluster: import.meta.env.VITE_PUSHER_CLUSTER
@@ -9,33 +16,32 @@ const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY, {
 Pusher.logToConsole = import.meta.env.DEV
 
 function App() {
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isLoading && e.key === ' ') {
-        console.log('hi')
-      }
+    const onConnect = () => {
+      setIsLoading(false)
     }
-    document.addEventListener('keydown', handleKeyDown)
+    pusher.connection.bind('connected', onConnect)
+  
     return () => {
-      document.removeEventListener('keydown', handleKeyDown)
+      pusher.connection.unbind('connected', onConnect)
     }
-  }, [isLoading])
-
-  pusher.connection.bind('connected', () => {
-    setIsLoading(false)
-    pusher.subscribe('channel-1')
-  })
+  }, [])
 
   if (isLoading) return <div>Loading...</div>
 
-  
-  
   return (
-    <PusherProvider pusher={pusher}>
-      <p>Connected</p>
-    </PusherProvider>
+    <Switch>
+      <Route path="/enter-name">
+        <EnterName />
+      </Route>
+      <Route>
+        <PusherProvider pusher={pusher}>
+          <Room />
+        </PusherProvider>
+      </Route>
+    </Switch>
   )
 }
 

@@ -1,15 +1,11 @@
-import { PropsWithChildren, createContext } from 'react';
+import { createContext, ReactNode } from 'react';
 import Pusher from 'pusher-js';
 
-type PusherContextType = {
-  pusher: Pusher;
-};
+export const PusherContext = createContext<Pusher | undefined>(undefined);
 
-export const PusherContext = createContext<PusherContextType | undefined>(undefined);
-
-export const PusherProvider = ({ pusher, children }: PropsWithChildren<PusherContextType>) => {
+export const PusherProvider = ({ pusher, children }: { pusher: Pusher, children: ReactNode}) => {
   return (
-    <PusherContext.Provider value={{ pusher }}>
+    <PusherContext.Provider value={pusher}>
       {children}
     </PusherContext.Provider>
   );
